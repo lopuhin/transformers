@@ -623,6 +623,8 @@ class PreTrainedTokenizer(object):
                     result += [tok]
             return result
 
+        all_special_tokens = self.all_special_tokens
+
         def split_on_tokens(tok_list, text):
             if not text:
                 return []
@@ -635,17 +637,17 @@ class PreTrainedTokenizer(object):
                 tokenized_text = []
                 for sub_text in text_list:
                     if sub_text not in self.added_tokens_encoder \
-                            and sub_text not in self.all_special_tokens:
+                            and sub_text not in all_special_tokens:
                         tokenized_text += split_on_token(tok, sub_text)
                     else:
                         tokenized_text += [sub_text]
                 text_list = tokenized_text
 
             return sum((self._tokenize(token, **kwargs) if token not \
-                    in self.added_tokens_encoder and token not in self.all_special_tokens \
+                    in self.added_tokens_encoder and token not in all_special_tokens \
                     else [token] for token in tokenized_text), [])
 
-        added_tokens = list(self.added_tokens_encoder.keys()) + self.all_special_tokens
+        added_tokens = list(self.added_tokens_encoder.keys()) + all_special_tokens
         tokenized_text = split_on_tokens(added_tokens, text)
         return tokenized_text
 
@@ -1045,7 +1047,7 @@ class PreTrainedTokenizer(object):
         all_toks = []
         set_attr = self.special_tokens_map
         for attr_value in set_attr.values():
-            all_toks = all_toks + (list(attr_value) if isinstance(attr_value, (list, tuple)) else [attr_value])
+            all_toks.extend(list(attr_value) if isinstance(attr_value, (list, tuple)) else [attr_value])
         all_toks = list(set(all_toks))
         return all_toks
 
